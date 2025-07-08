@@ -1,9 +1,9 @@
-import Image from "next/image";
+import { Button } from "./components/ui/button";
 
 export default function Home() {
   return (
-    <h1 className="flex h-screen items-center justify-center text-3xl font-bold underline">
-      Hello World
-    </h1>
+    <div className="flex h-screen items-center justify-center">
+      <Button>Hello World</Button>
+    </div>
   );
 }
