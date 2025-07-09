@@ -28,7 +28,7 @@ model Transaction {
 
 enum TransactionType {
   DEPOSIT
-  INCOME
+  EXPENSE
   INVESTMENT
 }
 
