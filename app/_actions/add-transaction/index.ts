@@ -7,11 +7,11 @@ import {
   TransactionPaymentMethod,
   TransactionType,
 } from "@prisma/client";
-import { addTransactionSchema } from "./schema";
+import { upsertTransactionSchema } from "./schema";
 import { revalidatePath } from "next/cache";
 
-// pensei em criar uma interface para os parametros, mas nao vale a pena
-interface AddTransactionParams {
+interface UpsertTransactionParams {
+  id?: string;
   name: string;
   amount: number;
   type: TransactionType;
@@ -20,17 +20,27 @@ interface AddTransactionParams {
   date: Date;
 }
 
-export const addTransaction = async (
-  //   params: Omit<Prisma.TransactionCreateInput, "userId">,
-  params: AddTransactionParams,
-) => {
-  addTransactionSchema.parse(params);
+export const upsertTransaction = async (params: UpsertTransactionParams) => {
+  upsertTransactionSchema.parse(params);
+
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("Unauthotized");
+    throw new Error("Unauthorized");
   }
-  await db.transaction.create({
-    data: { ...params, userId },
-  });
+
+  if (params.id) {
+    // Se tiver ID, faz upsert
+    await db.transaction.upsert({
+      where: { id: params.id },
+      update: { ...params, userId },
+      create: { ...params, userId },
+    });
+  } else {
+    // Se não tiver ID, cria novo
+    await db.transaction.create({
+      data: { ...params, userId },
+    });
+  }
+
   revalidatePath("/transactions");
 };
